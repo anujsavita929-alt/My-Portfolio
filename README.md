@@ -9,7 +9,7 @@ A futuristic, interactive personal portfolio built with **React + Vite** and **T
 - 🔮 **3D Interactive Sphere** — A rotating Three.js sphere with floating competition names orbiting around it; click any name to reveal a related image
 - 📜 **Horizontal Scrolling Projects** — Smooth, cinematic horizontal scroll section to showcase projects (inspired by Asura Scans)
 - 🌀 **Floating Spiral Images** — Animated background with spiral-positioned floating images for depth and atmosphere
-- 🐍 **Zigzag Skills Section** — Skills displayed in a snake/zigzag pattern for a unique layout
+<!-- - 🐍 **Zigzag Skills Section** — Skills displayed in a snake/zigzag pattern for a unique layout -->
 - 🔗 **Social Links** — Direct links to GitHub, LinkedIn, and WhatsApp
 - ⚡ **Blazing Fast** — Powered by Vite for near-instant dev startup and optimized builds
 - 📱 **Responsive Design** — Adapts gracefully across desktop, tablet, and mobile

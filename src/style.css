@@ -39,6 +39,11 @@ html {
   --text-dark: #1a2a3a;
   --text-mid: #3a5070;
   --text-soft: #6a8aaa;
+
+  /* Green accent */
+  --green: #00e5a0;
+  --green-deep: #00b87a;
+  --green-soft: rgba(0, 229, 160, 0.15);
 }
 
 
@@ -620,6 +625,85 @@ body.portfolio-active {
    NAV
 ══════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════
+   NAV — fixed logo top-left + vertical sidebar right
+══════════════════════════════════════════════════════ */
+
+/* Fixed logo top-left */
+.nav-logo-fixed {
+  position: fixed;
+  top: 28px;
+  left: 36px;
+  z-index: 500;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.nav-logo-fixed span {
+  color: var(--blush-deep);
+}
+
+[data-theme="dark"] .nav-logo-fixed {
+  color: #dff0f5;
+}
+
+[data-theme="dark"] .nav-logo-fixed span {
+  color: var(--cyan);
+}
+
+/* Right sidebar */
+.nav-sidebar {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 20px 16px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-left: 1px solid var(--glass-border);
+  border-radius: 20px 0 0 20px;
+  box-shadow: -4px 0 32px var(--glass-shadow);
+}
+
+[data-theme="dark"] .nav-sidebar {
+  background: rgba(0, 15, 35, 0.75);
+  border-color: rgba(0, 245, 255, 0.12);
+  box-shadow: -4px 0 32px rgba(0, 245, 255, 0.06);
+}
+
+/* Make GooeyNav vertical */
+.nav-sidebar .gooey-nav-container nav ul {
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  align-items: flex-end;
+}
+
+.nav-sidebar .gooey-nav-container nav ul li a {
+  writing-mode: horizontal-tb;
+  font-size: 0.78rem;
+  padding: 0.5em 0.8em;
+  white-space: nowrap;
+}
+
+.nav-sidebar .gooey-nav-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* Old nav rule — keep for fallback */
 nav {
   display: flex;
   justify-content: space-between;
@@ -629,36 +713,10 @@ nav {
 }
 
 .nav-logo {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-dark);
-  letter-spacing: 0.02em;
+  display: none;
 }
 
-.nav-logo span {
-  color: var(--blush-deep);
-}
-
-.nav-links {
-  display: flex;
-  gap: 32px;
-}
-
-.nav-links a {
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text-mid);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  transition: color 0.2s;
-}
-
-.nav-links a:hover {
-  color: var(--blush-deep);
-}
-
+/* hide old logo */
 
 /* ══════════════════════════════════════════════════════
    HERO
@@ -1630,17 +1688,313 @@ footer span {
 }
 
 [data-theme="dark"] .magic-bento-card--border-glow::after {
-  background: radial-gradient(
-    var(--glow-radius) circle at var(--glow-x) var(--glow-y),
-    rgba(0, 245, 255, calc(var(--glow-intensity) * 0.6)) 0%,
-    rgba(0, 245, 255, calc(var(--glow-intensity) * 0.3)) 30%,
-    transparent 60%
-  );
+  background: radial-gradient(var(--glow-radius) circle at var(--glow-x) var(--glow-y),
+      rgba(0, 245, 255, calc(var(--glow-intensity) * 0.6)) 0%,
+      rgba(0, 245, 255, calc(var(--glow-intensity) * 0.3)) 30%,
+      transparent 60%);
 }
 
 /* Dark theme toggle button */
 [data-theme="dark"] .theme-toggle {
   color: var(--cyan);
-  border-color: rgba(0,245,255,0.2);
-  background: rgba(0,245,255,0.05);
+  border-color: rgba(0, 245, 255, 0.2);
+  background: rgba(0, 245, 255, 0.05);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   HERO GREETING
+══════════════════════════════════════════════════════ */
+
+.hero-greeting {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--blush-deep);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  opacity: 0.85;
+}
+
+[data-theme="dark"] .hero-greeting {
+  color: var(--cyan);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   ABOUT SECTION
+══════════════════════════════════════════════════════ */
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.about-card {
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.about-icon {
+  font-size: 2rem;
+  margin-bottom: 4px;
+}
+
+.about-card h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--text-dark);
+}
+
+.about-card p {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  line-height: 1.7;
+}
+
+[data-theme="dark"] .about-card h3 {
+  color: #dff0f5;
+}
+
+[data-theme="dark"] .about-card p {
+  color: rgba(0, 245, 255, 0.45);
+}
+
+@media (max-width: 768px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════
+   HACKATHON / EXPERIENCE SECTION
+══════════════════════════════════════════════════════ */
+
+.experience-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.exp-card {
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.exp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--blush-deep);
+  background: rgba(232, 160, 168, 0.12);
+  border: 1px solid rgba(232, 160, 168, 0.25);
+  border-radius: 50px;
+  padding: 4px 12px;
+  width: fit-content;
+}
+
+.exp-card h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.exp-meta {
+  font-size: 0.75rem;
+  color: var(--text-soft);
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.exp-card p {
+  font-size: 0.83rem;
+  color: var(--text-soft);
+  line-height: 1.65;
+}
+
+/* Dark overrides */
+[data-theme="dark"] .exp-badge {
+  color: var(--cyan);
+  background: rgba(0, 245, 255, 0.08);
+  border-color: rgba(0, 245, 255, 0.2);
+}
+
+[data-theme="dark"] .exp-card h3 {
+  color: #dff0f5;
+}
+
+[data-theme="dark"] .exp-card p {
+  color: rgba(0, 245, 255, 0.45);
+}
+
+[data-theme="dark"] .exp-meta {
+  color: rgba(0, 245, 255, 0.35);
+}
+
+@media (max-width: 768px) {
+  .experience-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════
+   MAGICBENTO OVERRIDES
+══════════════════════════════════════════════════════ */
+
+.about-card.magic-bento-card,
+.exp-card.magic-bento-card,
+.project-card.magic-bento-card {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  aspect-ratio: unset !important;
+  min-height: unset !important;
+}
+
+[data-theme="dark"] .about-card.magic-bento-card,
+[data-theme="dark"] .exp-card.magic-bento-card,
+[data-theme="dark"] .project-card.magic-bento-card {
+  background: rgba(0, 15, 35, 0.65) !important;
+  border: 1px solid rgba(0, 245, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .magic-bento-card--border-glow::after {
+  background: radial-gradient(var(--glow-radius) circle at var(--glow-x) var(--glow-y),
+      rgba(0, 245, 255, calc(var(--glow-intensity)*0.6)) 0%,
+      rgba(0, 245, 255, calc(var(--glow-intensity)*0.3)) 30%,
+      transparent 60%);
+}
+
+
+.form-feedback {
+  margin-top: 12px;
+  font-size: 0.82rem;
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: 10px;
+}
+
+.form-feedback.success {
+  color: #00c896;
+  background: rgba(0, 200, 150, 0.08);
+  border: 1px solid rgba(0, 200, 150, 0.2);
+}
+
+.form-feedback.error {
+  color: var(--blush-deep);
+  background: rgba(216, 120, 128, 0.08);
+  border: 1px solid rgba(216, 120, 128, 0.2);
+}
+
+/* ══════════════════════════════════════════════════════
+   GREEN ACCENT TOUCHES
+══════════════════════════════════════════════════════ */
+
+/* Section header line — green tint */
+.section-header .line {
+  background: linear-gradient(to right,
+    rgba(216,120,128,0.4),
+    rgba(0,229,160,0.3),
+    transparent);
+}
+
+/* Skill bar — green fade */
+.skill-bar {
+  background: linear-gradient(to right,
+    var(--blush),
+    var(--blush-deep),
+    var(--green-deep));
+}
+
+/* Exp badge — alternate green */
+.exp-card:nth-child(odd) .exp-badge {
+  color: var(--green-deep);
+  background: var(--green-soft);
+  border-color: rgba(0,229,160,0.25);
+}
+
+/* Stat numbers — green tint on hover */
+.stat:hover .num { color: var(--green-deep); transition: color 0.3s; }
+
+/* proj-link hover green */
+.proj-link:hover { color: var(--green-deep); }
+
+/* Dark theme green touches */
+[data-theme="dark"] .section-header .line {
+  background: linear-gradient(to right,
+    rgba(0,245,255,0.4),
+    rgba(0,229,160,0.3),
+    transparent);
+}
+
+[data-theme="dark"] .skill-bar {
+  background: linear-gradient(to right,
+    rgba(0,180,200,0.8),
+    var(--cyan),
+    var(--green));
+}
+
+[data-theme="dark"] .exp-card:nth-child(odd) .exp-badge {
+  color: var(--green);
+  background: rgba(0,229,160,0.08);
+  border-color: rgba(0,229,160,0.2);
+}
+
+[data-theme="dark"] .stat:hover .num { color: var(--green); }
+[data-theme="dark"] .proj-link:hover { color: var(--green); }
+
+/* Nav sidebar green dot indicator on active */
+.nav-sidebar .gooey-nav-container nav ul li.active a {
+  color: var(--green-deep);
+}
+[data-theme="dark"] .nav-sidebar .gooey-nav-container nav ul li.active a {
+  color: var(--green);
+}
+
+/* GooeyNav pill — green in sidebar */
+.nav-sidebar .gooey-nav-container .effect.filter::after {
+  background: var(--green-deep);
+}
+[data-theme="dark"] .nav-sidebar .gooey-nav-container .effect.filter::after {
+  background: var(--green);
+}
+
+/* GooeyNav sidebar background anchor */
+.nav-sidebar .gooey-nav-container .effect.filter::before {
+  background: transparent;
+}
+
+/* ── Rotating Text hero ── */
+.hero-rotating-text {
+  display: inline-flex !important;
+  overflow: visible !important;
+}
+
+.hero-rotating-char {
+  display: inline-block;
+  color: var(--blush-deep);
+  font-style: italic;
+}
+
+[data-theme="dark"] .hero-rotating-char {
+  color: var(--cyan);
+}
+
+.nav-logo-fixed {
+  font-family: 'Cinzel Decorative', serif;  /* ← change this */
+  font-size: 1.4rem;
 }
