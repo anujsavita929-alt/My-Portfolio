@@ -1204,6 +1204,7 @@ nav {
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: fadeUp 0.7s ease 0.1s both;
   overflow: visible;
 }
 
@@ -1291,6 +1292,7 @@ nav {
 }
 
 /* 3 cards equally spaced 120° apart, same duration, different start */
+/* Remove scale from orbit items animation */
 .orbit-item-1 {
   animation: orbit 18s linear infinite 0s;
 }
@@ -1303,13 +1305,33 @@ nav {
   animation: orbit 18s linear infinite -12s;
 }
 
-@keyframes orbit {
+/* Fade goes on the INNER wrapper — no transform conflict */
+.orbit-card-inner {
+  animation: fadeInCard 0.9s ease both;
+  width: 100%;
+}
+
+.orbit-item-1 .orbit-card-inner {
+  animation-delay: 0.2s;
+}
+
+.orbit-item-2 .orbit-card-inner {
+  animation-delay: 0.5s;
+}
+
+.orbit-item-3 .orbit-card-inner {
+  animation-delay: 0.8s;
+}
+
+@keyframes fadeInCard {
   from {
-    transform: rotate(0deg) translateX(340px) rotate(0deg);
+    opacity: 0;
+    filter: blur(10px);
   }
 
   to {
-    transform: rotate(360deg) translateX(340px) rotate(-360deg);
+    opacity: 1;
+    filter: blur(0);
   }
 }
 
@@ -2354,4 +2376,137 @@ footer span {
 
 .about-card p {
   font-size: 0.88rem !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   UNIVERSAL CARD FADE-IN (scroll triggered)
+══════════════════════════════════════════════════════ */
+
+.about-card,
+.exp-card,
+.gallery-frame,
+.contact-card,
+.form-card,
+.hero-card {
+  opacity: 0;
+  transform: translateY(32px) scale(0.97);
+  filter: blur(4px);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.65s ease;
+}
+
+.about-card.card-visible,
+.exp-card.card-visible,
+.gallery-frame.card-visible,
+.contact-card.card-visible,
+.form-card.card-visible,
+.hero-card.card-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+/* stagger siblings */
+.about-card:nth-child(1),
+.exp-card:nth-child(1) {
+  transition-delay: 0s;
+}
+
+.about-card:nth-child(2),
+.exp-card:nth-child(2) {
+  transition-delay: 0.12s;
+}
+
+.about-card:nth-child(3),
+.exp-card:nth-child(3) {
+  transition-delay: 0.24s;
+}
+
+.about-card:nth-child(4),
+.exp-card:nth-child(4) {
+  transition-delay: 0.36s;
+}
+
+.gallery-frame:nth-child(1) {
+  transition-delay: 0s;
+}
+
+.gallery-frame:nth-child(2) {
+  transition-delay: 0.1s;
+}
+
+.gallery-frame:nth-child(3) {
+  transition-delay: 0.2s;
+}
+
+.gallery-frame:nth-child(4) {
+  transition-delay: 0.3s;
+}
+
+/* ── Orbital cards — fade in only, orbit handles movement ── */
+.orbit-item {
+  opacity: 0;
+  animation: orbit 18s linear infinite, fadeInCard 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.orbit-item-1 {
+  animation: orbit 18s linear infinite 0s, fadeInCard 0.9s ease 0.3s both;
+}
+
+.orbit-item-2 {
+  animation: orbit 18s linear infinite -6s, fadeInCard 0.9s ease 0.55s both;
+}
+
+.orbit-item-3 {
+  animation: orbit 18s linear infinite -12s, fadeInCard 0.9s ease 0.8s both;
+}
+
+@keyframes fadeInCard {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+/* orbit stays the same — NO scale/translate in fadeInCard so they don't conflict */
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(320px) rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(320px) rotate(-360deg);
+  }
+}
+
+.orbit-item:hover {
+  animation-play-state: paused !important;
+  z-index: 10;
+}
+
+.orbit-item:hover .project-card {
+  transform: scale(1.05);
+  box-shadow: 0 24px 60px rgba(0, 229, 160, 0.2) !important;
+}
+
+
+
+.gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%  !important;
+  border-radius: 18px;
+  transition: transform 0.4s ease;
+}
+
+.gallery-frame:hover .gallery-img {
+  transform: scale(1.04);
 }

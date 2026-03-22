@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import LiquidEther from './components/LiquidEther/LiquidEther';
 import './style.css';
 import emailjs from '@emailjs/browser';
-import gurukulImg from './assets/gurukul.jpg';
+import anujImg from './assets/anuj.jpeg';
 import ClickSpark from './components/ClickSpark/ClickSpark';
 import GooeyNav from './components/GooeyNav/GooeyNav';
 import RotatingText from './components/RotatingText/RotatingText';
@@ -25,6 +25,26 @@ export default function App() {
     localStorage.setItem('portfolio-theme', theme);
   }, [theme]);
 
+  /* ── Scroll-based fade-in for all cards ── */
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('card-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
+    const cards = document.querySelectorAll(
+      '.about-card, .skill-card, .exp-card, .gallery-frame, .contact-card, .form-card, .hero-card'
+    );
+    cards.forEach(card => observer.observe(card));
+    return () => observer.disconnect();
+  }, []);
+
   /* ══════════════════════════════════════════════════════
      BUGATTI 3D MODEL
   ══════════════════════════════════════════════════════ */
@@ -32,20 +52,20 @@ export default function App() {
     const canvas = document.getElementById('bugatti-canvas');
     if (!canvas) return;
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, 600 / 420, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(45, 500 / 360, 0.1, 1000);
     camera.position.set(4, 2, 6);
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setSize(600, 420);
+    renderer.setSize(500, 360);
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
     renderer.setClearColor(0x000000, 0);
-    scene.add(new THREE.AmbientLight(0xffffff, 1.2));
-    const dir = new THREE.DirectionalLight(0xffffff, 2.5);
+    scene.add(new THREE.AmbientLight(0xffffff, 1.4));
+    const dir = new THREE.DirectionalLight(0xffffff, 3.0);
     dir.position.set(5, 10, 5); dir.castShadow = true; scene.add(dir);
-    const fill = new THREE.DirectionalLight(0xa8c8ff, 1.0); fill.position.set(-5, 2, -5); scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xffd0a0, 0.8); rim.position.set(0, 5, -8); scene.add(rim);
+    const fill = new THREE.DirectionalLight(0xa8c8ff, 1.2); fill.position.set(-5, 2, -5); scene.add(fill);
+    const rim = new THREE.DirectionalLight(0xffd0a0, 1.0); rim.position.set(0, 5, -8); scene.add(rim);
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; controls.dampingFactor = 0.05; controls.enablePan = false;
     controls.minDistance = 3; controls.maxDistance = 12; controls.maxPolarAngle = Math.PI / 2.1;
@@ -71,9 +91,10 @@ export default function App() {
     }
     animateBugatti();
     const onResize = () => {
-      const w = canvas.parentElement?.clientWidth || 600;
-      camera.aspect = w / 420; camera.updateProjectionMatrix();
-      renderer.setSize(w, 420); canvas.width = w; canvas.height = 420;
+      const w = canvas.parentElement?.clientWidth || 500;
+      const h = Math.round(w * 0.72);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
     };
     window.addEventListener('resize', onResize);
     const stopAuto = () => { controls.autoRotate = false; };
@@ -182,6 +203,12 @@ export default function App() {
         requestAnimationFrame(() => requestAnimationFrame(() => {
           portfolio.style.transition = 'opacity 0.9s ease'; portfolio.style.opacity = '1';
           portfolio.classList.add('animate-in');
+          /* trigger card fade-ins after portfolio appears */
+          setTimeout(() => {
+            document.querySelectorAll('.about-card,.skill-card,.exp-card,.gallery-frame,.contact-card,.form-card,.hero-card').forEach((el, i) => {
+              setTimeout(() => el.classList.add('card-visible'), i * 60);
+            });
+          }, 400);
         }));
         targetSpeed = 0.5;
       }, 1600);
@@ -189,29 +216,35 @@ export default function App() {
     const cteEl = document.getElementById('cte');
     cteEl.addEventListener('click', onCteClick);
 
-    const track = document.querySelector('.skills-track');
-    let isDown = false, startX = 0, scrollLeft = 0;
-    const onTrackDown = e => { isDown = true; startX = e.pageX - track.offsetLeft; scrollLeft = track.scrollLeft; track.style.cursor = 'grabbing'; };
-    const onTrackUp = () => { isDown = false; track.style.cursor = 'grab'; };
-    const onTrackMove = e => { if (!isDown) return; e.preventDefault(); const x = e.pageX - track.offsetLeft; track.scrollLeft = scrollLeft - (x - startX) * 1.5; };
-    if (track) { track.addEventListener('mousedown', onTrackDown); track.addEventListener('mouseleave', onTrackUp); track.addEventListener('mouseup', onTrackUp); track.addEventListener('mousemove', onTrackMove); }
-
     return () => {
       running = false; cancelAnimationFrame(animId); clearInterval(loadInterval);
       cteEl.removeEventListener('click', onCteClick); window.removeEventListener('resize', onResize);
       renderer.dispose();
       if (wrap && wrap.contains(renderer.domElement)) wrap.removeChild(renderer.domElement);
-      if (track) { track.removeEventListener('mousedown', onTrackDown); track.removeEventListener('mouseleave', onTrackUp); track.removeEventListener('mouseup', onTrackUp); track.removeEventListener('mousemove', onTrackMove); }
     };
   }, []);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    setFormStatus('sending');
+    e.preventDefault(); setFormStatus('sending');
     emailjs.sendForm('service_wl8iieg', 'template_nn8jbm4', formRef.current, 'Me5cayM2taeL1Davu')
       .then(() => { setFormStatus('sent'); formRef.current.reset(); setTimeout(() => setFormStatus('idle'), 5000); })
       .catch(() => { setFormStatus('error'); setTimeout(() => setFormStatus('idle'), 5000); });
   };
+
+  /* Skill data */
+  const skills = [
+    { href: 'https://developer.mozilla.org/en-US/docs/Web/HTML', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg', alt: 'HTML5', name: 'HTML & CSS', desc: 'Semantic markup, CSS animations, glassmorphism — interfaces that feel alive.', pct: '92%' },
+    { href: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg', alt: 'JS', name: 'JavaScript', desc: 'ES6+, DOM manipulation, async patterns, and creative interaction logic.', pct: '88%' },
+    { href: 'https://react.dev', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg', alt: 'React', name: 'React.js', desc: 'Component-driven SPAs, hooks, state management, and modern patterns.', pct: '85%' },
+    { href: 'https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Responsive_Design', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg', alt: 'CSS3', name: 'Responsive Design', desc: 'Mobile-first layouts, CSS grid and flexbox — pixel-perfect across all devices.', pct: '90%' },
+    { href: 'https://threejs.org', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/threejs/threejs-original.svg', alt: 'Three.js', name: 'Three.js', desc: '3D scenes, particle systems, and shader-based visual experiences.', pct: '72%' },
+    { href: 'https://www.blender.org', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/blender/blender-original.svg', alt: 'Blender', name: 'Blender', desc: '3D models, animations, and assets for web integration.', pct: '65%' },
+    { href: 'https://gsap.com', icon: 'https://cdn.worldvectorlogo.com/logos/gsap-greensock.svg', alt: 'GSAP', name: 'GSAP', desc: 'Timeline animations, scroll triggers, and smooth micro-interactions.', pct: '75%' },
+    { href: 'https://github.com', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg', alt: 'GitHub', name: 'Git & GitHub', desc: 'Version control, branching workflows, and collaborative development.', pct: '85%' },
+    { href: 'https://www.figma.com', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg', alt: 'Figma', name: 'Figma', desc: 'UI design, prototyping, and design-to-code handoff.', pct: '70%' },
+    { href: 'https://www.python.org', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg', alt: 'Python', name: 'Python', desc: 'Algorithms, Flask backends, genetic algorithms, and data structures.', pct: '78%' },
+    { href: 'https://cplusplus.com', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg', alt: 'C++', name: 'C++', desc: 'Low-level programming, graphics.h animations, and problem solving.', pct: '65%' },
+  ];
 
   return (
     <>
@@ -227,7 +260,7 @@ export default function App() {
         </div>
         <div id="loader-content">
           <div id="loader-header">
-            <img src={gurukulImg} alt="Anuj" id="loader-img" />
+            <img src={anujImg} alt="Anuj" id="loader-img" />
             <div className="ld-logo">Anuj Savita</div>
           </div>
           <div className="ld-label">Initializing Portfolio</div>
@@ -294,9 +327,7 @@ export default function App() {
               particleCount={10} particleDistances={[80, 10]} particleR={80}
               animationTime={600} timeVariance={300} colors={[1, 2, 3, 4, 1, 2, 3]} initialActiveIndex={0}
             />
-            <button className="theme-toggle" onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')} aria-label="Toggle theme">
-              {theme === 'light' ? '◐' : '◑'}
-            </button>
+            <button className="theme-toggle" onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')} aria-label="Toggle theme" />
           </div>
 
           <div className="wrapper">
@@ -310,8 +341,7 @@ export default function App() {
                   <em>
                     <RotatingText
                       texts={['I build immersive', 'I craft interactive', 'I design creative', 'I code beautiful', 'I ship fast']}
-                      mainClassName="hero-rotating-text"
-                      elementLevelClassName="hero-rotating-char"
+                      mainClassName="hero-rotating-text" elementLevelClassName="hero-rotating-char"
                       splitBy="characters" staggerDuration={0.03} staggerFrom="first"
                       rotationInterval={2500} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                     />
@@ -340,136 +370,57 @@ export default function App() {
             <section className="section" id="about">
               <div className="section-header reveal"><h2>About Me</h2><div className="line"></div></div>
               <div className="about-grid">
-                <ParticleCard className="about-card glass magic-bento-card magic-bento-card--border-glow reveal delay-1" glowColor="216, 120, 128" particleCount={10} enableTilt={true} clickEffect={true}>
+                <ParticleCard className="about-card glass magic-bento-card magic-bento-card--border-glow" glowColor="216,120,128" particleCount={10} enableTilt clickEffect>
                   <div className="about-icon">👨‍💻</div><h3>Who I Am</h3>
-                  <p>I'm a frontend developer who enjoys blending design and development to create unique digital experiences. I specialize in building responsive, animated, and interactive websites using React and Three.js.</p>
+                  <p>I'm a frontend developer who enjoys blending design and development to create unique digital experiences using React and Three.js.</p>
                 </ParticleCard>
-                <ParticleCard className="about-card glass magic-bento-card magic-bento-card--border-glow reveal delay-2" glowColor="216, 120, 128" particleCount={10} enableTilt={true} clickEffect={true}>
+                <ParticleCard className="about-card glass magic-bento-card magic-bento-card--border-glow" glowColor="216,120,128" particleCount={10} enableTilt clickEffect>
                   <div className="about-icon">🎯</div><h3>What I Do</h3>
-                  <p>I work with Blender to integrate 3D elements into the web, making projects feel more alive. I'm focused on improving through projects, hackathons, and experimenting with creative UI/UX concepts.</p>
+                  <p>I work with Blender to integrate 3D into the web, making projects feel more alive. Focused on projects, hackathons, and creative UI/UX concepts.</p>
                 </ParticleCard>
-                <ParticleCard className="about-card glass magic-bento-card magic-bento-card--border-glow reveal delay-3" glowColor="0, 245, 255" particleCount={10} enableTilt={true} clickEffect={true}>
+                <ParticleCard className="about-card glass magic-bento-card magic-bento-card--border-glow" glowColor="0,245,255" particleCount={10} enableTilt clickEffect>
                   <div className="about-icon">🚀</div><h3>Currently</h3>
-                  <p>CS student at MITS Gwalior — building full-stack apps, experimenting with WebGL shaders, and participating in hackathons to push creative boundaries.</p>
+                  <p>CS student at MITS Gwalior — building full-stack apps, experimenting with WebGL shaders, and participating in hackathons.</p>
                 </ParticleCard>
               </div>
             </section>
 
             {/* ── SKILLS ── */}
-            {/* ── SKILLS ── */}
             <section className="section" id="skills">
-              <div className="section-header reveal">
-                <h2>Craft &amp; Tools</h2>
-                <div className="line"></div>
-              </div>
+              <div className="section-header reveal"><h2>Craft &amp; Tools</h2><div className="line"></div></div>
               <div className="skills-scroll-wrapper">
-                <div className="skills-track skills-track-loop">
-                  {/* Render twice for seamless infinite loop */}
+                <div className="skills-track-loop">
                   {[0, 1].map(copy => (
                     <div key={copy} className="skills-set" aria-hidden={copy === 1}>
-                      <a href="https://developer.mozilla.org/en-US/docs/Web/HTML" target="_blank" rel="noreferrer" className="skill-card glass skill-link">
-                        <div className="skill-icon">
-                          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" alt="HTML5" />
-                        </div>
-                        <h3>HTML &amp; CSS</h3>
-                        <p>Semantic markup, CSS animations, glassmorphism — interfaces that feel alive.</p>
-                        <div className="skill-bar-wrap"><div className="skill-bar" style={{ width: '92%' }}></div></div>
-                      </a>
-                      <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noreferrer" className="skill-card glass skill-link">
-                        <div className="skill-icon">
-                          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="JS" />
-                        </div>
-                        <h3>JavaScript</h3>
-                        <p>ES6+, DOM manipulation, async patterns, and creative interaction logic.</p>
-                        <div className="skill-bar-wrap"><div className="skill-bar" style={{ width: '88%' }}></div></div>
-                      </a>
-                      <a href="https://react.dev" target="_blank" rel="noreferrer" className="skill-card glass skill-link">
-                        <div className="skill-icon">
-                          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="React" />
-                        </div>
-                        <h3>React.js</h3>
-                        <p>Component-driven SPAs, hooks, state management, and modern patterns.</p>
-                        <div className="skill-bar-wrap"><div className="skill-bar" style={{ width: '85%' }}></div></div>
-                      </a>
-                      <a href="https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Responsive_Design" target="_blank" rel="noreferrer" className="skill-card glass skill-link">
-                        <div className="skill-icon">
-                          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" alt="CSS3" />
-                        </div>
-                        <h3>Responsive Design</h3>
-                        <p>Mobile-first layouts, CSS grid and flexbox — pixel-perfect across all devices.</p>
-                        <div className="skill-bar-wrap"><div className="skill-bar" style={{ width: '90%' }}></div></div>
-                      </a>
-                      <a href="https://threejs.org" target="_blank" rel="noreferrer" className="skill-card glass skill-link">
-                        <div className="skill-icon">
-                          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/threejs/threejs-original.svg" alt="Three.js" />
-                        </div>
-                        <h3>Three.js</h3>
-                        <p>3D scenes, particle systems, and shader-based visual experiences in the browser.</p>
-                        <div className="skill-bar-wrap"><div className="skill-bar" style={{ width: '72%' }}></div></div>
-                      </a>
-                      <a href="https://www.blender.org" target="_blank" rel="noreferrer" className="skill-card glass skill-link">
-                        <div className="skill-icon">
-                          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/blender/blender-original.svg" alt="Blender" />
-                        </div>
-                        <h3>Blender</h3>
-                        <p>3D models, animations, and assets for web integration and visual storytelling.</p>
-                        <div className="skill-bar-wrap"><div className="skill-bar" style={{ width: '65%' }}></div></div>
-                      </a>
-                      <a href="https://gsap.com" target="_blank" rel="noreferrer" className="skill-card glass skill-link">
-                        <div className="skill-icon">
-                          <img src="https://cdn.worldvectorlogo.com/logos/gsap-greensock.svg" alt="GSAP" />
-                        </div>
-                        <h3>GSAP</h3>
-                        <p>Timeline animations, scroll triggers, and smooth micro-interactions.</p>
-                        <div className="skill-bar-wrap"><div className="skill-bar" style={{ width: '75%' }}></div></div>
-                      </a>
-                      <a href="https://github.com" target="_blank" rel="noreferrer" className="skill-card glass skill-link">
-                        <div className="skill-icon">
-                          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" />
-                        </div>
-                        <h3>Git &amp; GitHub</h3>
-                        <p>Version control, branching workflows, and collaborative development.</p>
-                        <div className="skill-bar-wrap"><div className="skill-bar" style={{ width: '85%' }}></div></div>
-                      </a>
-                      <a href="https://www.figma.com" target="_blank" rel="noreferrer" className="skill-card glass skill-link">
-                        <div className="skill-icon">
-                          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg" alt="Figma" />
-                        </div>
-                        <h3>Figma</h3>
-                        <p>UI design, prototyping, and design-to-code handoff for polished interfaces.</p>
-                        <div className="skill-bar-wrap"><div className="skill-bar" style={{ width: '70%' }}></div></div>
-                      </a>
-                      <a href="https://www.python.org" target="_blank" rel="noreferrer" className="skill-card glass skill-link">
-                        <div className="skill-icon">
-                          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python" />
-                        </div>
-                        <h3>Python</h3>
-                        <p>Algorithms, Flask backends, genetic algorithms, and data structures.</p>
-                        <div className="skill-bar-wrap"><div className="skill-bar" style={{ width: '78%' }}></div></div>
-                      </a>
-                      <a href="https://www.cplusplus.com" target="_blank" rel="noreferrer" className="skill-card glass skill-link">
-                        <div className="skill-icon">
-                          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" alt="C++" />
-                        </div>
-                        <h3>C++</h3>
-                        <p>Low-level programming, graphics.h animations, and algorithmic problem solving.</p>
-                        <div className="skill-bar-wrap"><div className="skill-bar" style={{ width: '65%' }}></div></div>
-                      </a>
+                      {skills.map((s, i) => (
+                        <a key={i} href={s.href} target="_blank" rel="noreferrer" className="skill-card glass skill-link">
+                          <div className="skill-icon">
+                            <img src={s.icon} alt={s.alt} />
+                          </div>
+                          <h3>{s.name}</h3>
+                          <p>{s.desc}</p>
+                          <div className="skill-bar-wrap"><div className="skill-bar" style={{ width: s.pct }}></div></div>
+                        </a>
+                      ))}
                     </div>
                   ))}
                 </div>
               </div>
             </section>
 
-            {/* ── GALLERY / SHOWCASE ── */}
+            {/* ── SHOWCASE ── */}
             <section className="section" id="models">
-              <div className="section-header reveal">
-                <h2>Showcase</h2>
-                <div className="line"></div>
-              </div>
+              <div className="section-header reveal"><h2>Showcase</h2><div className="line"></div></div>
               <div className="gallery-grid">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="gallery-frame glass reveal">
+
+                {/* Real photo */}
+                <div className="gallery-frame glass">
+                  <img src={anujImg} alt="Anuj Savita" className="gallery-img" />
+                </div>
+
+                {/* Placeholders */}
+                {[2, 3, 4].map(i => (
+                  <div key={i} className="gallery-frame glass">
                     <div className="gallery-placeholder">
                       <div className="gallery-plus">＋</div>
                       <span>Image {i}</span>
@@ -477,78 +428,96 @@ export default function App() {
                     </div>
                   </div>
                 ))}
+
               </div>
             </section>
 
             {/* ── PROJECTS ── */}
             <section className="section" id="work">
-              <div className="section-header reveal">
-                <h2>Selected Work</h2>
-                <div className="line"></div>
-              </div>
-
+              <div className="section-header reveal"><h2>Selected Work</h2><div className="line"></div></div>
               <div className="orbital-section">
-
-                {/* Decorative rings */}
                 <div className="orbit-ring-visual"></div>
-
-                {/* Center — Bugatti */}
                 <div className="bugatti-center">
                   <canvas id="bugatti-canvas" width="500" height="360"></canvas>
                   <div className="bugatti-hint">🖱 drag · scroll to zoom</div>
                 </div>
-
-                {/* Orbiting cards */}
                 <div className="orbit-item orbit-item-1">
                   <ParticleCard className="project-card glass magic-bento-card magic-bento-card--border-glow"
-                    glowColor="216, 120, 128" particleCount={8} enableTilt={true} clickEffect={true} enableMagnetism={false}>
+                    glowColor="216,120,128" particleCount={8} enableTilt clickEffect>
                     <div className="proj-number">01</div>
                     <h3>School Timetable System</h3>
                     <p>Full-stack app automating timetables with Next.js, Prisma, and a genetic algorithm engine.</p>
                     <div className="tags">
-                      <span className="tag-pill">Next.js</span>
-                      <span className="tag-pill">TypeScript</span>
-                      <span className="tag-pill">Prisma</span>
+                      <span className="tag-pill">Next.js</span><span className="tag-pill">TypeScript</span><span className="tag-pill">Prisma</span>
                     </div>
                     <a href="https://github.com/anujsavita929-alt/v0-school-timetable-ui" className="proj-link">GitHub →</a>
                   </ParticleCard>
                 </div>
-
                 <div className="orbit-item orbit-item-2">
                   <ParticleCard className="project-card glass magic-bento-card magic-bento-card--border-glow"
-                    glowColor="216, 120, 128" particleCount={8} enableTilt={true} clickEffect={true} enableMagnetism={false}>
+                    glowColor="216,120,128" particleCount={8} enableTilt clickEffect>
                     <div className="proj-number">02</div>
                     <h3>Madhav Cafeteria</h3>
                     <p>Landing page for a local café — Instagram-inspired palette, animations, and hover effects.</p>
                     <div className="tags">
-                      <span className="tag-pill">HTML/CSS</span>
-                      <span className="tag-pill">Animations</span>
+                      <span className="tag-pill">HTML/CSS</span><span className="tag-pill">Animations</span>
                     </div>
                     <a href="#" className="proj-link">Live Site →</a>
                   </ParticleCard>
                 </div>
-
                 <div className="orbit-item orbit-item-3">
                   <ParticleCard className="project-card glass magic-bento-card magic-bento-card--border-glow"
-                    glowColor="216, 120, 128" particleCount={8} enableTilt={true} clickEffect={true} enableMagnetism={false}>
+                    glowColor="216,120,128" particleCount={8} enableTilt clickEffect>
                     <div className="proj-number">03</div>
                     <h3>Animation Assets Library</h3>
                     <p>Modular CSS &amp; JS animations — glitch, neon glow, wave text, rainbow shift and more.</p>
                     <div className="tags">
-                      <span className="tag-pill">CSS</span>
-                      <span className="tag-pill">JavaScript</span>
-                      <span className="tag-pill">Open Source</span>
+                      <span className="tag-pill">CSS</span><span className="tag-pill">JavaScript</span><span className="tag-pill">Open Source</span>
                     </div>
                     <a href="https://github.com/anujsavita929-alt/assets" target="_blank" rel="noreferrer" className="proj-link">GitHub →</a>
                   </ParticleCard>
                 </div>
+              </div>
+            </section>
 
+            {/* ── HACKATHON / EXPERIENCE ── */}
+            <section className="section" id="experience">
+              <div className="section-header reveal"><h2>Hackathons &amp; Experience</h2><div className="line"></div></div>
+              <div className="experience-grid">
+                <ParticleCard className="exp-card glass magic-bento-card magic-bento-card--border-glow" glowColor="0,245,255" particleCount={10} enableTilt clickEffect>
+                  <div className="exp-badge">🏆 Hackathon</div>
+                  <h3>Frontend Battle 2K26</h3>
+                  <div className="exp-meta">MITS Gwalior &nbsp;·&nbsp; Round 1: Portfolio Showdown</div>
+                  <p>Built a futuristic "developer OS" portfolio using Three.js with 80,000-particle spiral galaxy and glassmorphism UI.</p>
+                  <div className="tags"><span className="tag-pill">Three.js</span><span className="tag-pill">React</span><span className="tag-pill">WebGL</span><span className="tag-pill">GSAP</span></div>
+                </ParticleCard>
+                <ParticleCard className="exp-card glass magic-bento-card magic-bento-card--border-glow" glowColor="0,245,255" particleCount={10} enableTilt clickEffect>
+                  <div className="exp-badge">🏆 Hackathon</div>
+                  <h3>HackIgnite</h3>
+                  <div className="exp-meta">MITS Gwalior &nbsp;·&nbsp; Hackathon</div>
+                  <p>Participated in HackIgnite — built and shipped a creative project under time pressure, competing against teams across the campus.</p>
+                  <div className="tags"><span className="tag-pill">Hackathon</span><span className="tag-pill">MITS</span><span className="tag-pill">Team</span></div>
+                </ParticleCard>
+                <ParticleCard className="exp-card glass magic-bento-card magic-bento-card--border-glow" glowColor="216,120,128" particleCount={10} enableTilt clickEffect>
+                  <div className="exp-badge">💡 Project</div>
+                  <h3>AI Timetable Generator</h3>
+                  <div className="exp-meta">Full-Stack &nbsp;·&nbsp; Flask + Gemini API</div>
+                  <p>AI-powered timetable generator with Aurora Glassmorphism frontend and role-based access for admin/teacher/student views.</p>
+                  <div className="tags"><span className="tag-pill">Flask</span><span className="tag-pill">Gemini API</span><span className="tag-pill">Python</span></div>
+                </ParticleCard>
+                <ParticleCard className="exp-card glass magic-bento-card magic-bento-card--border-glow" glowColor="216,120,128" particleCount={10} enableTilt clickEffect>
+                  <div className="exp-badge">🎨 Creative Dev</div>
+                  <h3>3D Galaxy Visualizer</h3>
+                  <div className="exp-meta">Three.js &nbsp;·&nbsp; WebGL</div>
+                  <p>80,000-particle spiral galaxy with interactive orbit controls, custom shaders, and real-time rotation.</p>
+                  <div className="tags"><span className="tag-pill">Three.js</span><span className="tag-pill">Vite</span><span className="tag-pill">Shaders</span></div>
+                </ParticleCard>
               </div>
             </section>
 
             {/* ── CONTACT ── */}
             <div className="contact-row" id="contact">
-              <div className="contact-card glass reveal delay-1">
+              <div className="contact-card glass">
                 <h2>Let's build something.</h2>
                 <p>Have a project idea or want to collaborate? Let's build something amazing together. Based in Gwalior — happy to work remotely.</p>
                 <div className="social-links">
@@ -557,26 +526,21 @@ export default function App() {
                   <a href="https://www.linkedin.com/in/anuj-savita-b1a4a6391/" target="_blank" rel="noreferrer" className="social-link"><span className="icon">💼</span> linkedin.com/in/anuj-savita</a>
                 </div>
               </div>
-              <div className="form-card glass reveal delay-2">
+              <div className="form-card glass">
                 <form ref={formRef} onSubmit={handleSubmit}>
                   <div className="form-group"><label>Name</label><input type="text" name="from_name" placeholder="Your name" required /></div>
                   <div className="form-group"><label>Email</label><input type="email" name="from_email" placeholder="your@email.com" required /></div>
                   <div className="form-group"><label>Message</label><textarea name="message" placeholder="Tell me about your project..." required></textarea></div>
                   <button type="submit" className="btn-primary" style={{ width: '100%', textAlign: 'center' }} disabled={formStatus === 'sending'}>
-                    {formStatus === 'idle' && 'Send Message'}
-                    {formStatus === 'sending' && '⏳ Sending...'}
-                    {formStatus === 'sent' && '✅ Message Sent!'}
-                    {formStatus === 'error' && '❌ Try Again'}
+                    {formStatus === 'idle' && 'Send Message'}{formStatus === 'sending' && '⏳ Sending...'}{formStatus === 'sent' && '✅ Message Sent!'}{formStatus === 'error' && '❌ Try Again'}
                   </button>
                   {formStatus === 'sent' && <p className="form-feedback success">Thanks! I'll get back to you soon.</p>}
-                  {formStatus === 'error' && <p className="form-feedback error">Something went wrong. Email me directly at anujsavita395@gmail.com</p>}
+                  {formStatus === 'error' && <p className="form-feedback error">Something went wrong. Email me at anujsavita395@gmail.com</p>}
                 </form>
               </div>
             </div>
 
-            <footer>
-              Crafted with care by <span>Anuj Savita</span> · Gwalior, India · 2026
-            </footer>
+            <footer>Crafted with care by <span>Anuj Savita</span> · Gwalior, India · 2026</footer>
 
           </div>{/* /wrapper */}
         </ClickSpark>
